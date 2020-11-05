@@ -71,8 +71,10 @@ fn handle_supports(pre: &dyn Preprocessor, sub_args: &ArgMatches) -> ! {
 /// in your main `lib.rs` file.
 mod nop_lib {
     use super::*;
+    use std::fmt::{Debug, Formatter};
 
     /// A no-op preprocessor.
+    #[derive(Clone)]
     pub struct Nop;
 
     impl Nop {
@@ -103,6 +105,12 @@ mod nop_lib {
             renderer != "not-supported"
         }
     }
+    impl Debug for Nop {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            f.write_str("nop-preprocessor")
+        }
+    }
+
 
     #[cfg(test)]
     mod test {
