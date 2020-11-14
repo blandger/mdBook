@@ -74,6 +74,7 @@ pub fn take_rustdoc_include_lines<R: RangeBounds<usize>>(s: &str, range: R) -> S
         output.push('\n');
     }
     output.pop();
+    trace!("take_rustdoc_include_lines = {:?}", output.to_string());
     output
 }
 
@@ -112,6 +113,7 @@ pub fn take_rustdoc_include_anchored_lines(s: &str, anchor: &str) -> String {
     }
 
     output.pop();
+    trace!("take_rustdoc_include_anchored_lines = {:?}", output.to_string());
     output
 }
 

@@ -16,7 +16,9 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::fmt::Debug;
+use std::{
+    fmt::{Debug},
+};
 
 /// Extra information for a `Preprocessor` to give them more context when
 /// processing a book.
