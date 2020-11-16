@@ -60,7 +60,7 @@ impl Preprocessor for LinkPreprocessor {
 
                     let mut chapter_title = ch.name.clone();
                     let content =
-                        replace_all(&ch.content, base, chapter_path, 0, &mut chapter_title);
+                        replace_all(&ch.content, base, chapter_path, 0, &mut chapter_title, false);
                     ch.content = content;
                     if chapter_title != ch.name {
                         ctx.chapter_titles
@@ -84,7 +84,8 @@ impl Preprocessor for LinkPreprocessor {
                 .expect("All book items have a parent");
 
             trace!("base = {:?}", &base.display());
-            let updated_content = replace_all(&chapter.content.clone(), base, chapter_path, 0);
+            let updated_content = replace_all(
+                &chapter.content.clone(), base, chapter_path, 0, true);
             trace!("updated_content = {:?}", updated_content.len());
             chapter.content = updated_content;
         }
@@ -103,6 +104,7 @@ pub fn replace_all<P1, P2>(
     source: P2,
     depth: usize,
     chapter_title: &mut String,
+    cutoff_commented_lines: bool
 ) -> String
 where
     P1: AsRef<Path>,
@@ -122,7 +124,7 @@ where
         trace!("replace_all: slice_string = {:?}", slice_string);
         replaced.push_str(slice_string);
 
-        match link.render_with_path(path, chapter_title) {
+        match link.render_with_path(path, chapter_title, cutoff_commented_lines) {
             Ok(new_content) => {
                 trace!("replace_all: new_content = {:?}", new_content);
                 if depth < MAX_LINK_NESTED_DEPTH {
@@ -133,6 +135,7 @@ where
                             source,
                             depth + 1,
                             chapter_title,
+                            cutoff_commented_lines
                         ));
                     } else {
                         replaced.push_str(&new_content);
@@ -354,6 +357,7 @@ impl<'a> Link<'a> {
         &self,
         base: P,
         chapter_title: &mut String,
+        cutoff_commented_lines
     ) -> Result<String> {
         let base = base.as_ref();
         match self.link_type {
@@ -380,10 +384,10 @@ impl<'a> Link<'a> {
                 fs::read_to_string(&target)
                     .map(|s| match range_or_anchor {
                         RangeOrAnchor::Range(range) => {
-                            take_rustdoc_include_lines(&s, range.clone())
+                            take_rustdoc_include_lines(&s, range.clone(), cutoff_commented_lines)
                         }
                         RangeOrAnchor::Anchor(anchor) => {
-                            take_rustdoc_include_anchored_lines(&s, anchor)
+                            take_rustdoc_include_anchored_lines(&s, anchor, cutoff_commented_lines)
                         }
                     })
                     .with_context(|| {
@@ -474,9 +478,25 @@ mod tests {
         {{#include file.rs}} << an escaped link!
         ```";
         let mut chapter_title = "test_replace_all_escaped".to_owned();
-        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title), end);
+        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, false), end);
     }
 
+
+    #[test]
+    fn test_replace_all_escaped_with_cutoff() {
+        let start = r"
+        Some text over here.
+        ```hbs
+        \{{#include file.rs}} << an escaped link!
+        ```";
+        let end = r"
+        Some text over here.
+        ```hbs
+        {{#include file.rs}} << an escaped link!
+        ```";
+        assert_eq!(replace_all(start, "", "", 0, false), end);
+    }
+    
     #[test]
     fn test_set_chapter_title() {
         let start = r"{{#title My Title}}
@@ -486,7 +506,7 @@ mod tests {
         # My Chapter
         ";
         let mut chapter_title = "test_set_chapter_title".to_owned();
-        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title), end);
+        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, false), end);
         assert_eq!(chapter_title, "My Title");
     }
 
