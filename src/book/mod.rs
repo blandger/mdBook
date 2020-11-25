@@ -633,7 +633,6 @@ mod tests {
     use super::*;
     use std::str::FromStr;
     use toml::value::Table;
-    use std::fmt::{Debug, Formatter};
 
     #[test]
     fn config_defaults_to_html_renderer_if_empty() {
@@ -888,11 +887,6 @@ mod tests {
 
         fn supports_renderer(&self, _renderer: &str) -> bool {
             self.0
-        }
-    }
-    impl Debug for BoolPreprocessor {
-        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-            f.write_str("bool-preprocessor")
         }
     }
 

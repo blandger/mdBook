@@ -47,11 +47,6 @@ impl Preprocessor for IndexPreprocessor {
         Ok(book)
     }
 }
-impl Debug for IndexPreprocessor {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(Self::NAME)
-    }
-}
 
 fn warn_readme_name_conflict<P: AsRef<Path>>(readme_path: P, index_path: P) {
     let file_name = readme_path.as_ref().file_name().unwrap_or_default();

@@ -92,11 +92,6 @@ impl Preprocessor for LinkPreprocessor {
         Ok(())
     }
 }
-impl Debug for LinkPreprocessor {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(Self::NAME)
-    }
-}
 
 pub fn replace_all<P1, P2>(
     s: &str,
@@ -496,7 +491,7 @@ mod tests {
         ```";
         assert_eq!(replace_all(start, "", "", 0, false), end);
     }
-    
+
     #[test]
     fn test_set_chapter_title() {
         let start = r"{{#title My Title}}
