@@ -15,6 +15,7 @@ use std::{
 };
 use log::{error, warn};
 use once_cell::sync::Lazy;
+use ammonia::url::form_urlencoded::Target;
 
 const ESCAPE_CHAR: char = '\\';
 const MAX_LINK_NESTED_DEPTH: usize = 10;
@@ -87,8 +88,9 @@ impl Preprocessor for LinkPreprocessor {
             trace!("base = {:?}", &base.display());
             // replace link {{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-01/src/main.rs:print}}
             // by lined content with removing # dashed lines
+            let mut chapter_title:String = chapter.name.clone();
             let updated_content = replace_all(
-                &chapter.content.clone(), base, chapter_path, 0, true);
+                &chapter.content.clone(), base, chapter_path, 0, chapter_title.as_mut_string(), true);
             trace!("updated_content = {:?}", updated_content.len());
             chapter.content = updated_content;
         }
@@ -96,8 +98,7 @@ impl Preprocessor for LinkPreprocessor {
     }
 }
 
-/// Replace content with linked content and cutoff (or not) dashed lines
-pub fn replace_all<P1, P2>(
+fn replace_all<P1, P2>(
     s: &str,
     path: P1,
     source: P2,
@@ -134,7 +135,7 @@ where
                             source,
                             depth + 1,
                             chapter_title,
-                            cutoff_commented_lines
+                            true
                         ));
                     } else {
                         replaced.push_str(&new_content);
@@ -482,18 +483,16 @@ mod tests {
 
 
     #[test]
-    fn test_replace_all_escaped_with_cutoff() {
-        let start = r"
-        Some text over here.
-        ```hbs
-        \{{#include file.rs}} << an escaped link!
-        ```";
+    fn test_set_chapter_title() {
+        let start = r"{{#title My Title}}
+        # My Chapter
+        ";
         let end = r"
-        Some text over here.
-        ```hbs
-        {{#include file.rs}} << an escaped link!
-        ```";
-        assert_eq!(replace_all(start, "", "", 0, false), end);
+        # My Chapter
+        ";
+        let mut chapter_title = "test_set_chapter_title".to_owned();
+        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, true), end);
+        assert_eq!(chapter_title, "My Title");
     }
 
     #[test]
