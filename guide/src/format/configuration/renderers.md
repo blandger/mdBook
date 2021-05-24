@@ -144,6 +144,10 @@ The following configuration options are available:
 - **no-section-label:** mdBook by defaults adds numeric section labels in the table of
   contents column. For example, "1.", "2.1". Set this option to true to disable
   those labels. Defaults to `false`.
+- **fold:** A subtable for configuring sidebar section-folding behavior.
+- **playground:** A subtable for configuring various playground settings.
+- **search:** A subtable for configuring the in-browser search functionality.
+  mdBook must be compiled with the `search` feature enabled (on by default).
 - **git-repository-url:**  A url to the git repository for the book. If provided
   an icon link will be output in the menu bar of the book.
 - **git-repository-icon:** The FontAwesome icon class to use for the git
@@ -157,6 +161,12 @@ The following configuration options are available:
   `https://bitbucket.org/<owner>/<repo>/src/<branch>/{path}?mode=edit`
   where {path} will be replaced with the full path of the file in the
   repository.
+- **redirect:** A subtable used for generating redirects when a page is moved.
+  The table contains key-value pairs where the key is where the redirect file
+  needs to be created, as an absolute path from the build directory, (e.g.
+  `/appendices/bibliography.html`). The value can be any valid URI the
+  browser should navigate to (e.g. `https://rust-lang.org/`,
+  `/overview.html`, or `../bibliography.html`).
 - **input-404:** The name of the markdown file used for missing files.
   The corresponding output file will be the same, with the extension replaced with `html`.
   Defaults to `404.md`.
@@ -307,6 +317,53 @@ The `[output.html.redirect]` table provides a way to add redirects.
 This is useful when you move, rename, or remove a page to ensure that links to the old URL will go to the new location.
 
 ```toml
+[book]
+title = "Example book"
+authors = ["John Doe", "Jane Doe"]
+description = "The example book covers examples."
+
+[output.html]
+theme = "my-theme"
+default-theme = "light"
+preferred-dark-theme = "navy"
+curly-quotes = true
+mathjax-support = false
+copy-fonts = true
+google-analytics = "UA-123456-7"
+additional-css = ["custom.css", "custom2.css"]
+additional-js = ["custom.js"]
+no-section-label = false
+git-repository-url = "https://github.com/rust-lang/mdBook"
+git-repository-icon = "fa-github"
+edit-url-template = "https://github.com/rust-lang/mdBook/edit/master/guide/{path}"
+site-url = "/example-book/"
+cname = "myproject.rs"
+input-404 = "not-found.md"
+
+[output.html.print]
+enable = true
+
+[output.html.fold]
+enable = false
+level = 0
+
+[output.html.playground]
+editable = false
+copy-js = true
+line-numbers = false
+
+[output.html.search]
+enable = true
+limit-results = 30
+teaser-word-count = 30
+use-boolean-and = true
+boost-title = 2
+boost-hierarchy = 1
+boost-paragraph = 1
+expand = true
+heading-split-level = 3
+copy-js = true
+
 [output.html.redirect]
 "/appendices/bibliography.html" = "https://rustc-dev-guide.rust-lang.org/appendix/bibliography.html"
 "/other-installation-methods.html" = "../infra/other-installation-methods.html"
@@ -337,3 +394,20 @@ only whether it is enabled or disabled.
 
 See [the preprocessors documentation](preprocessors.md) for how to
 specify which preprocessors should run before the Markdown renderer.
+
+### Custom Renderers
+
+A custom renderer can be enabled by adding a `[output.foo]` table to your
+`book.toml`. Similar to [preprocessors](#configuring-preprocessors) this will
+instruct `mdbook` to pass a representation of the book to `mdbook-foo` for
+rendering. See the [alternative backends] chapter for more detail.
+
+The custom renderer has access to all the fields within its table (i.e.
+anything under `[output.foo]`). mdBook checks for two common fields:
+
+- **command:** The command to execute for this custom renderer. Defaults to
+  the name of the renderer with the `mdbook-` prefix (such as `mdbook-foo`).
+- **optional:** If `true`, then the command will be ignored if it is not
+  installed, otherwise mdBook will fail with an error. Defaults to `false`.
+
+[alternative backends]: ../../for_developers/backends.md

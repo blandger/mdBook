@@ -28,6 +28,7 @@ For information on how to create a new preprocessor, see the [Preprocessors for 
 Preprocessors can be added by including a `preprocessor` table in `book.toml` with the name of the preprocessor.
 For example, if you have a preprocessor called `mdbook-example`, then you can include it with:
 
+**book.toml**
 ```toml
 [preprocessor.example]
 ```
