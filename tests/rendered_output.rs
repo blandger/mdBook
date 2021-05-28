@@ -627,7 +627,7 @@ fn edit_url_has_default_src_dir_edit_url() {
         title = "implicit"
 
         [output.html]
-        edit-url-template = "https://github.com/rust-lang/mdBook/edit/master/guide/{path}"    
+        edit-url-template = "https://github.com/rust-lang/mdBook/edit/master/guide/{path}"
         "#;
 
     write_file(temp.path(), "book.toml", book_toml.as_bytes()).unwrap();
@@ -653,7 +653,7 @@ fn edit_url_has_configured_src_dir_edit_url() {
         src = "src2"
 
         [output.html]
-        edit-url-template = "https://github.com/rust-lang/mdBook/edit/master/guide/{path}"    
+        edit-url-template = "https://github.com/rust-lang/mdBook/edit/master/guide/{path}"
         "#;
 
     write_file(temp.path(), "book.toml", book_toml.as_bytes()).unwrap();
