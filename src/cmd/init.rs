@@ -1,5 +1,5 @@
 use crate::get_book_dir;
-use clap::{arg, ArgMatches, Command as ClapCommand};
+use clap::{arg, Arg, ArgMatches, Command as ClapCommand};
 use mdbook::config;
 use mdbook::errors::Result;
 use mdbook::MDBook;
@@ -24,6 +24,20 @@ pub fn make_subcommand() -> ClapCommand {
         .arg(
             arg!(--ignore <ignore> "Creates a VCS ignore file (i.e. .gitignore)")
                 .value_parser(["none", "git"]),
+        )
+        .arg(
+            Arg::with_name("title")
+                .short("t")
+                .long("title")
+                .takes_value(true)
+                .help("Sets the book title")
+                .required(false),
+        )
+        .arg(
+            Arg::with_name("gitignore")
+                .short("g")
+                .long("gitignore")
+                .help("Creates a .gitignore"),
         )
 }
 
