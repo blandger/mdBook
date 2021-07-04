@@ -398,7 +398,7 @@ specify which preprocessors should run before the Markdown renderer.
 ### Custom Renderers
 
 A custom renderer can be enabled by adding a `[output.foo]` table to your
-`book.toml`. Similar to [preprocessors](#configuring-preprocessors) this will
+`book.toml`. Similar to [preprocessors](preprocessors.md) this will
 instruct `mdbook` to pass a representation of the book to `mdbook-foo` for
 rendering. See the [alternative backends] chapter for more detail.
 
