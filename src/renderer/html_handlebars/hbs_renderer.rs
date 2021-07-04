@@ -1069,6 +1069,30 @@ mod tests {
     fn add_playground_edition2021() {
         let inputs = [
             ("<code class=\"language-rust\">x()</code>",
+             "<pre class=\"playground\"><code class=\"language-rust edition2021\">\n<span class=\"boring\">#![allow(unused)]\n</span><span class=\"boring\">fn main() {\n</span>x()\n<span class=\"boring\">}\n</span></code></pre>"),
+            ("<code class=\"language-rust\">fn main() {}</code>",
+             "<pre class=\"playground\"><code class=\"language-rust edition2021\">fn main() {}\n</code></pre>"),
+            ("<code class=\"language-rust edition2015\">fn main() {}</code>",
+             "<pre class=\"playground\"><code class=\"language-rust edition2015\">fn main() {}\n</code></pre>"),
+            ("<code class=\"language-rust edition2018\">fn main() {}</code>",
+             "<pre class=\"playground\"><code class=\"language-rust edition2018\">fn main() {}\n</code></pre>"),
+        ];
+        for (src, should_be) in &inputs {
+            let got = add_playground_pre(
+                src,
+                &Playground {
+                    editable: true,
+                    ..Playground::default()
+                },
+                Some(RustEdition::E2021),
+            );
+            assert_eq!(&*got, *should_be);
+        }
+    }
+    #[test]
+    fn add_playground_edition2021() {
+        let inputs = [
+            ("<code class=\"language-rust\">x()</code>",
              "<pre class=\"playground\"><code class=\"language-rust edition2021\"># #![allow(unused)]\n# fn main() {\nx()\n# }</code></pre>"),
             ("<code class=\"language-rust\">fn main() {}</code>",
              "<pre class=\"playground\"><code class=\"language-rust edition2021\">fn main() {}</code></pre>"),

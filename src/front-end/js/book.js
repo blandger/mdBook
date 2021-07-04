@@ -125,7 +125,7 @@ function playground_text(playground, hidden = true) {
             code: text,
             edition: edition,
         };
-
+        alert(params.edition);
         if (text.indexOf('#![feature') !== -1) {
             params.version = 'nightly';
         }
