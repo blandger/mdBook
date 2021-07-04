@@ -33,9 +33,12 @@ pub fn make_subcommand() -> ClapCommand {
                 .required(false),
         )
         .arg(
-            Arg::with_name("gitignore")
-                .long("gitignore")
-                .help("Creates a .gitignore"),
+            Arg::with_name("ignore")
+                .long("ignore")
+                .takes_value(true)
+                .possible_values(&["none", "git"])
+                .help("Creates a VCS ignore file (i.e. .gitignore)")
+                .required(false),
         )
 }
 
