@@ -923,10 +923,10 @@ fn add_playground_pre(
                             // we need to inject our own main
                             let (attrs, code) = partition_source(code);
 
-                            format!("# #![allow(unused)]\n{}#fn main() {{\n{}#}}", attrs, code)
-                                .into()
-                        };
-                        content
+                                format!("# #![allow(unused)]\n{}#fn main() {{\n{}#}}", attrs, code)
+                                    .into()
+                            };
+                            content
                     }
                 )
             } else {
@@ -1029,7 +1029,7 @@ fn hide_lines_with_prefix(content: &str, prefix: &str) -> String {
             continue;
         }
         result += line;
-        result += "\n";
+        result += newline;
     }
     result
 }
@@ -1205,13 +1205,13 @@ mod tests {
     fn add_playground_edition2021() {
         let inputs = [
             ("<code class=\"language-rust\">x()</code>",
-             "<pre class=\"playground\"><code class=\"language-rust edition2021\">\n<span class=\"boring\">#![allow(unused)]\n</span><span class=\"boring\">fn main() {\n</span>x()\n<span class=\"boring\">}\n</span></code></pre>"),
+             "<pre class=\"playground\"><code class=\"language-rust edition2021\"><span class=\"boring\">#![allow(unused)]\n</span><span class=\"boring\">fn main() {\n</span>x()\n<span class=\"boring\">}</span></code></pre>"),
             ("<code class=\"language-rust\">fn main() {}</code>",
-             "<pre class=\"playground\"><code class=\"language-rust edition2021\">fn main() {}\n</code></pre>"),
+             "<pre class=\"playground\"><code class=\"language-rust edition2021\">fn main() {}</code></pre>"),
             ("<code class=\"language-rust edition2015\">fn main() {}</code>",
-             "<pre class=\"playground\"><code class=\"language-rust edition2015\">fn main() {}\n</code></pre>"),
+             "<pre class=\"playground\"><code class=\"language-rust edition2015\">fn main() {}</code></pre>"),
             ("<code class=\"language-rust edition2018\">fn main() {}</code>",
-             "<pre class=\"playground\"><code class=\"language-rust edition2018\">fn main() {}\n</code></pre>"),
+             "<pre class=\"playground\"><code class=\"language-rust edition2018\">fn main() {}</code></pre>"),
         ];
         for (src, should_be) in &inputs {
             let got = add_playground_pre(
