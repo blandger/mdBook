@@ -826,7 +826,6 @@ mod tests {
         multilingual = true
         src = "source"
         language = "ja"
-        version = "0.0.1"
 
         [build]
         build-dir = "outputs"
