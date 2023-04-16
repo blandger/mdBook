@@ -9,7 +9,7 @@ use std::ops::{Bound, Range, RangeBounds, RangeFrom, RangeFull, RangeTo};
 use std::path::{Path, PathBuf};
 
 use super::{Preprocessor, PreprocessorContext};
-use crate::book::{Book, BookItem, Chapter};
+use crate::book::{Book, BookItem};
 use std::{
     fmt::{Debug, Formatter},
 };
