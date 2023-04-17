@@ -9,11 +9,11 @@ use std::ops::{Bound, Range, RangeBounds, RangeFrom, RangeFull, RangeTo};
 use std::path::{Path, PathBuf};
 
 use super::{Preprocessor, PreprocessorContext};
-use crate::book::{Book, BookItem};
+use crate::book::{Book, BookItem, Chapter};
 use std::{
     fmt::{Debug, Formatter},
 };
-use log::{error, warn};
+use log::{error, trace, warn};
 use once_cell::sync::Lazy;
 use ammonia::url::form_urlencoded::Target;
 
@@ -60,8 +60,9 @@ impl Preprocessor for LinkPreprocessor {
                         .expect("All book items have a parent");
 
                     let mut chapter_title = ch.name.clone();
-                    let content =
-                        replace_all(&ch.content, base, chapter_path, 0, &mut chapter_title, false);
+                    // run normal link replacement by all content with 'dashed' lines inside present
+                    let content = replace_all(
+                        &ch.content, base, chapter_path, 0, &mut chapter_title, false);
                     ch.content = content;
                     if chapter_title != ch.name {
                         ctx.chapter_titles
@@ -104,7 +105,7 @@ fn replace_all<P1, P2>(
     source: P2,
     depth: usize,
     chapter_title: &mut String,
-    cutoff_commented_lines: bool
+    cutoff_commented_lines: bool,
 ) -> String
 where
     P1: AsRef<Path>,
@@ -135,7 +136,7 @@ where
                             source,
                             depth + 1,
                             chapter_title,
-                            true
+                            cutoff_commented_lines,
                         ));
                     } else {
                         replaced.push_str(&new_content);
@@ -357,7 +358,7 @@ impl<'a> Link<'a> {
         &self,
         base: P,
         chapter_title: &mut String,
-        cutoff_commented_lines
+        cutoff_commented_lines: bool,
     ) -> Result<String> {
         let base = base.as_ref();
         match self.link_type {
@@ -493,6 +494,23 @@ mod tests {
         let mut chapter_title = "test_set_chapter_title".to_owned();
         assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, true), end);
         assert_eq!(chapter_title, "My Title");
+        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, false), end);
+    }
+
+    #[test]
+    fn test_replace_all_escaped_with_cutoff() {
+        let start = r"
+        Some text over here.
+        ```hbs
+        \{{#include file.rs}} << an escaped link!
+        ```";
+        let end = r"
+        Some text over here.
+        ```hbs
+        {{#include file.rs}} << an escaped link!
+        ```";
+        let mut chapter_title = "test_replace_all_escaped_with_cutoff".to_owned();
+        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, false), end);
     }
 
     #[test]
