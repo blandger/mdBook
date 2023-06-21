@@ -62,7 +62,13 @@ impl Preprocessor for LinkPreprocessor {
                     let mut chapter_title = ch.name.clone();
                     // run normal link replacement by all content with 'dashed' lines inside present
                     let content = replace_all(
-                        &ch.content, base, chapter_path, 0, &mut chapter_title, false);
+                        &ch.content,
+                        base,
+                        chapter_path,
+                        0,
+                        &mut chapter_title,
+                        false,
+                    );
                     ch.content = content;
                     if chapter_title != ch.name {
                         ctx.chapter_titles
@@ -91,7 +97,13 @@ impl Preprocessor for LinkPreprocessor {
             // by lined content with removing # dashed lines
             let mut chapter_title:String = chapter.name.clone();
             let updated_content = replace_all(
-                &chapter.content.clone(), base, chapter_path, 0, chapter_title.as_mut_string(), true);
+                &chapter.content.clone(),
+                base,
+                chapter_path,
+                0,
+                 chapter_title.as_mut_string(),
+                true,
+            );
             trace!("updated_content = {:?}", updated_content.len());
             chapter.content = updated_content;
         }
@@ -479,7 +491,10 @@ mod tests {
         {{#include file.rs}} << an escaped link!
         ```";
         let mut chapter_title = "test_replace_all_escaped".to_owned();
-        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, false), end);
+        assert_eq!(
+            replace_all(start, "", "", 0, &mut chapter_title, false),
+            end
+        );
     }
 
 
@@ -510,7 +525,10 @@ mod tests {
         {{#include file.rs}} << an escaped link!
         ```";
         let mut chapter_title = "test_replace_all_escaped_with_cutoff".to_owned();
-        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, false), end);
+        assert_eq!(
+            replace_all(start, "", "", 0, &mut chapter_title, false),
+            end
+        );
     }
 
     #[test]
@@ -522,7 +540,10 @@ mod tests {
         # My Chapter
         ";
         let mut chapter_title = "test_set_chapter_title".to_owned();
-        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, false), end);
+        assert_eq!(
+            replace_all(start, "", "", 0, &mut chapter_title, false),
+            end
+        );
         assert_eq!(chapter_title, "My Title");
     }
 

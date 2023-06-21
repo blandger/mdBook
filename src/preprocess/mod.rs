@@ -64,7 +64,10 @@ pub trait Preprocessor: PreprocessorClone {
 
     /// Pre-Process only one mutable chapter using context and supplied pre-processor
     fn preprocess_chapter(&self, ctx: &PreprocessorContext, chapter: &mut Chapter) -> Result<()> {
-        println!("preprocess chapter: '{}' by ctx = {}", chapter.name, ctx.renderer);
+        println!(
+            "preprocess chapter: '{}' by ctx = {}",
+            chapter.name, ctx.renderer
+        );
         Ok(())
     }
 
