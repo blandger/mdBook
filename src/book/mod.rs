@@ -437,7 +437,7 @@ impl MDBook {
     pub fn clone_preprocessors(&self) -> Vec<Box<dyn Preprocessor>> {
         self.preprocessors.clone()
     }
-   }
+}
 
 /// Look at the `Config` and try to figure out what renderers to use.
 fn determine_renderers(config: &Config) -> Vec<Box<dyn Renderer>> {
