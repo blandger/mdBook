@@ -18,7 +18,6 @@ use log::{debug, error, info, log_enabled, trace, warn};
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
-use std::string::ToString;
 use tempfile::Builder as TempFileBuilder;
 use toml::Value;
 use topological_sort::TopologicalSort;
@@ -71,18 +70,24 @@ impl MDBook {
 
         config.update_from_env();
 
-        if config
-            .html_config()
-            .map_or(false, |html| html.google_analytics.is_some())
-        {
-            warn!(
-                "The output.html.google-analytics field has been deprecated; \
-                 it will be removed in a future release.\n\
-                 Consider placing the appropriate site tag code into the \
-                 theme/head.hbs file instead.\n\
-                 The tracking code may be found in the Google Analytics Admin page.\n\
-               "
-            );
+        if let Some(html_config) = config.html_config() {
+            if html_config.google_analytics.is_some() {
+                warn!(
+                    "The output.html.google-analytics field has been deprecated; \
+                     it will be removed in a future release.\n\
+                     Consider placing the appropriate site tag code into the \
+                     theme/head.hbs file instead.\n\
+                     The tracking code may be found in the Google Analytics Admin page.\n\
+                   "
+                );
+            }
+            if html_config.curly_quotes {
+                warn!(
+                    "The output.html.curly-quotes field has been renamed to \
+                     output.html.smart-punctuation.\n\
+                     Use the new name in book.toml to remove this warning."
+                );
+            }
         }
 
         if log_enabled!(log::Level::Trace) {
@@ -610,7 +615,7 @@ fn preprocessor_should_run(
 mod tests {
     use super::*;
     use std::str::FromStr;
-    use toml::value::{Table, Value};
+    use toml::value::Table;
 
     #[test]
     fn config_defaults_to_html_renderer_if_empty() {
