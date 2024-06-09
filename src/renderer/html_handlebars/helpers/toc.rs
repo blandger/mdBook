@@ -74,12 +74,6 @@ impl HelperDef for RenderToc {
         let mut is_first_chapter = ctx.data().get("is_index").is_some();
 
         for item in chapters {
-            // Spacer
-            if item.get("spacer").is_some() {
-                out.write("<li class=\"spacer\"></li>")?;
-                continue;
-            }
-
             let (section, level) = if let Some(s) = item.get("section") {
                 (s.as_str(), s.matches('.').count())
             } else {
@@ -114,8 +108,14 @@ impl HelperDef for RenderToc {
                     write_li_open_tag(out, is_expanded, false)?;
                 }
                 Ordering::Equal => {
-                    write_li_open_tag(out, is_expanded, item.get("section").is_none())?;
+                    write_li_open_tag(out, is_expanded, !item.contains_key("section"))?;
                 }
+            }
+
+            // Spacer
+            if item.contains_key("spacer") {
+                out.write("<li class=\"spacer\"></li>")?;
+                continue;
             }
 
             // Part title
