@@ -73,6 +73,7 @@ mod nop_lib {
     use super::*;
 
     /// A no-op preprocessor.
+    #[derive(Clone)]
     pub struct Nop;
 
     impl Nop {
@@ -103,6 +104,7 @@ mod nop_lib {
             renderer != "not-supported"
         }
     }
+
 
     #[cfg(test)]
     mod test {
