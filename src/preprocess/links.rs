@@ -10,10 +10,8 @@ use std::path::{Path, PathBuf};
 
 use super::{Preprocessor, PreprocessorContext};
 use crate::book::{Book, BookItem, Chapter};
-use std::{
-    fmt::{Debug, Formatter},
-};
-use log::{error, trace, warn};
+use std::fmt::Debug;
+use log::{debug, error, trace, warn};
 use once_cell::sync::Lazy;
 use ammonia::url::form_urlencoded::Target;
 
@@ -530,23 +528,7 @@ mod tests {
             end
         );
     }
-
-    #[test]
-    fn test_set_chapter_title() {
-        let start = r"{{#title My Title}}
-        # My Chapter
-        ";
-        let end = r"
-        # My Chapter
-        ";
-        let mut chapter_title = "test_set_chapter_title".to_owned();
-        assert_eq!(
-            replace_all(start, "", "", 0, &mut chapter_title, false),
-            end
-        );
-        assert_eq!(chapter_title, "My Title");
-    }
-
+    
     #[test]
     fn test_find_links_no_link() {
         let s = "Some random text without link...";

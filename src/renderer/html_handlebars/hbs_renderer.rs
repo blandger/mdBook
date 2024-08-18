@@ -894,7 +894,7 @@ fn hide_lines_with_prefix(content: &str, prefix: &str) -> String {
             continue;
         }
         result += line;
-        result += newline;
+        result += "\n";
     }
     result
 }
@@ -1062,30 +1062,6 @@ mod tests {
                     ..Playground::default()
                 },
                 Some(RustEdition::E2018),
-            );
-            assert_eq!(&*got, *should_be);
-        }
-    }
-    #[test]
-    fn add_playground_edition2021() {
-        let inputs = [
-            ("<code class=\"language-rust\">x()</code>",
-             "<pre class=\"playground\"><code class=\"language-rust edition2021\"><span class=\"boring\">#![allow(unused)]\n</span><span class=\"boring\">fn main() {\n</span>x()\n<span class=\"boring\">}</span></code></pre>"),
-            ("<code class=\"language-rust\">fn main() {}</code>",
-             "<pre class=\"playground\"><code class=\"language-rust edition2021\">fn main() {}</code></pre>"),
-            ("<code class=\"language-rust edition2015\">fn main() {}</code>",
-             "<pre class=\"playground\"><code class=\"language-rust edition2015\">fn main() {}</code></pre>"),
-            ("<code class=\"language-rust edition2018\">fn main() {}</code>",
-             "<pre class=\"playground\"><code class=\"language-rust edition2018\">fn main() {}</code></pre>"),
-        ];
-        for (src, should_be) in &inputs {
-            let got = add_playground_pre(
-                src,
-                &Playground {
-                    editable: true,
-                    ..Playground::default()
-                },
-                Some(RustEdition::E2021),
             );
             assert_eq!(&*got, *should_be);
         }

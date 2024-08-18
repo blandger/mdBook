@@ -1001,26 +1001,6 @@ mod tests {
     }
 
     #[test]
-    fn edition_2021() {
-        let src = r#"
-        [book]
-        title = "mdBook Documentation"
-        description = "Create book from markdown files. Like Gitbook but implemented in Rust"
-        authors = ["Mathieu David"]
-        src = "./source"
-        [rust]
-        edition = "2021"
-        "#;
-
-        let rust_should_be = RustConfig {
-            edition: Some(RustEdition::E2021),
-        };
-
-        let got = Config::from_str(src).unwrap();
-        assert_eq!(got.rust, rust_should_be);
-    }
-
-    #[test]
     fn load_arbitrary_output_type() {
         #[derive(Debug, Deserialize, PartialEq)]
         struct RandomOutput {

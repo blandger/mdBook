@@ -6,7 +6,6 @@ use crate::book::{Book, BookItem};
 use crate::errors::*;
 use log::warn;
 use once_cell::sync::Lazy;
-use std::fmt::{Formatter, Debug};
 
 /// A preprocessor for converting file name `README.md` to `index.md` since
 /// `README.md` is the de facto index file in markdown-based documentation.
