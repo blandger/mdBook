@@ -10,7 +10,6 @@ use std::path::{Path, PathBuf};
 
 use super::{Preprocessor, PreprocessorContext};
 use crate::book::{Book, BookItem, Chapter};
-use ammonia::url::form_urlencoded::Target;
 use log::{debug, error, trace, warn};
 use once_cell::sync::Lazy;
 use std::fmt::Debug;
@@ -99,7 +98,7 @@ impl Preprocessor for LinkPreprocessor {
                 base,
                 chapter_path,
                 0,
-                chapter_title.as_mut_string(),
+                &mut chapter_title,
                 true,
             );
             trace!("updated_content = {:?}", updated_content.len());
