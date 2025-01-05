@@ -1,8 +1,8 @@
+use log::trace;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use std::ops::Bound::{Excluded, Included, Unbounded};
 use std::ops::RangeBounds;
-use log::trace;
 
 /// Take a range of lines from a string.
 pub fn take_lines<R: RangeBounds<usize>>(s: &str, range: R) -> String {
@@ -128,7 +128,10 @@ pub fn take_rustdoc_include_anchored_lines(
     }
 
     output.pop();
-    trace!("take_rustdoc_include_anchored_lines = {:?}", output.to_string());
+    trace!(
+        "take_rustdoc_include_anchored_lines = {:?}",
+        output.to_string()
+    );
     output
 }
 

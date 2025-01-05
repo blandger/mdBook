@@ -791,10 +791,9 @@ fn add_playground_pre(
                             // we need to inject our own main
                             let (attrs, code) = partition_source(code);
 
-                                format!("# #![allow(unused)]\n{attrs}# fn main() {{\n{code}# }}")
-                                    .into()
-                            };
-                            content
+                            format!("# #![allow(unused)]\n{attrs}# fn main() {{\n{code}# }}").into()
+                        };
+                        content
                     }
                 )
             } else {
