@@ -10,10 +10,10 @@ use std::path::{Path, PathBuf};
 
 use super::{Preprocessor, PreprocessorContext};
 use crate::book::{Book, BookItem, Chapter};
-use std::fmt::Debug;
+use ammonia::url::form_urlencoded::Target;
 use log::{debug, error, trace, warn};
 use once_cell::sync::Lazy;
-use ammonia::url::form_urlencoded::Target;
+use std::fmt::Debug;
 
 const ESCAPE_CHAR: char = '\\';
 const MAX_LINK_NESTED_DEPTH: usize = 10;
@@ -93,13 +93,13 @@ impl Preprocessor for LinkPreprocessor {
             trace!("base = {:?}", &base.display());
             // replace link {{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-01/src/main.rs:print}}
             // by lined content with removing # dashed lines
-            let mut chapter_title:String = chapter.name.clone();
+            let mut chapter_title: String = chapter.name.clone();
             let updated_content = replace_all(
                 &chapter.content.clone(),
                 base,
                 chapter_path,
                 0,
-                 chapter_title.as_mut_string(),
+                chapter_title.as_mut_string(),
                 true,
             );
             trace!("updated_content = {:?}", updated_content.len());
@@ -126,7 +126,11 @@ where
     // we therefore have to store the difference to correct this
     let path = path.as_ref();
     let source = source.as_ref();
-    trace!("replace_all: path = {:?}, source={:?}", path.display(), source.display());
+    trace!(
+        "replace_all: path = {:?}, source={:?}",
+        path.display(),
+        source.display()
+    );
     let mut previous_end_index = 0;
     let mut replaced = String::new();
 
@@ -495,7 +499,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn test_set_chapter_title() {
         let start = r"{{#title My Title}}
@@ -507,7 +510,10 @@ mod tests {
         let mut chapter_title = "test_set_chapter_title".to_owned();
         assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, true), end);
         assert_eq!(chapter_title, "My Title");
-        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, false), end);
+        assert_eq!(
+            replace_all(start, "", "", 0, &mut chapter_title, false),
+            end
+        );
     }
 
     #[test]
@@ -528,7 +534,7 @@ mod tests {
             end
         );
     }
-    
+
     #[test]
     fn test_find_links_no_link() {
         let s = "Some random text without link...";

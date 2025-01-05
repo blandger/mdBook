@@ -105,7 +105,6 @@ mod nop_lib {
         }
     }
 
-
     #[cfg(test)]
     mod test {
         use super::*;
