@@ -28,6 +28,7 @@ fn main() {
     }
 }
 
+#[derive(Clone)]
 struct RemoveEmphasis;
 
 impl Preprocessor for RemoveEmphasis {
