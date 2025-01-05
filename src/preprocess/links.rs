@@ -9,9 +9,10 @@ use std::ops::{Bound, Range, RangeBounds, RangeFrom, RangeFull, RangeTo};
 use std::path::{Path, PathBuf};
 
 use super::{Preprocessor, PreprocessorContext};
-use crate::book::{Book, BookItem};
-use log::{error, warn};
+use crate::book::{Book, BookItem, Chapter};
+use log::{debug, error, trace, warn};
 use once_cell::sync::Lazy;
+use std::fmt::Debug;
 
 const ESCAPE_CHAR: char = '\\';
 const MAX_LINK_NESTED_DEPTH: usize = 10;
@@ -26,7 +27,7 @@ const MAX_LINK_NESTED_DEPTH: usize = 10;
 ///   block and provides them to Rustdoc for testing.
 /// - `{{# playground}}` - Insert runnable Rust files
 /// - `{{# title}}` - Override \<title\> of a webpage.
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct LinkPreprocessor;
 
 impl LinkPreprocessor {
@@ -45,6 +46,7 @@ impl Preprocessor for LinkPreprocessor {
 
     fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
         let src_dir = ctx.root.join(&ctx.config.book.src);
+        trace!("src = {:?}", &src_dir.display());
 
         book.for_each_mut(|section: &mut BookItem| {
             if let BookItem::Chapter(ref mut ch) = *section {
@@ -55,8 +57,15 @@ impl Preprocessor for LinkPreprocessor {
                         .expect("All book items have a parent");
 
                     let mut chapter_title = ch.name.clone();
-                    let content =
-                        replace_all(&ch.content, base, chapter_path, 0, &mut chapter_title);
+                    // run normal link replacement by all content with 'dashed' lines inside present
+                    let content = replace_all(
+                        &ch.content,
+                        base,
+                        chapter_path,
+                        0,
+                        &mut chapter_title,
+                        false,
+                    );
                     ch.content = content;
                     if chapter_title != ch.name {
                         ctx.chapter_titles
@@ -69,6 +78,34 @@ impl Preprocessor for LinkPreprocessor {
 
         Ok(book)
     }
+
+    /// Pre-process one chapter's content by supplied preprocessor
+    fn preprocess_chapter(&self, ctx: &PreprocessorContext, chapter: &mut Chapter) -> Result<()> {
+        if let Some(ref chapter_path) = chapter.path {
+            let src_dir = ctx.root.join(&ctx.config.book.src);
+            trace!("src_dir = {:?}", &src_dir.display());
+            let base = chapter_path
+                .parent()
+                .map(|dir| src_dir.join(dir))
+                .expect("All book items have a parent");
+
+            trace!("base = {:?}", &base.display());
+            // replace link {{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-01/src/main.rs:print}}
+            // by lined content with removing # dashed lines
+            let mut chapter_title: String = chapter.name.clone();
+            let updated_content = replace_all(
+                &chapter.content.clone(),
+                base,
+                chapter_path,
+                0,
+                &mut chapter_title,
+                true,
+            );
+            trace!("updated_content = {:?}", updated_content.len());
+            chapter.content = updated_content;
+        }
+        Ok(())
+    }
 }
 
 fn replace_all<P1, P2>(
@@ -77,6 +114,7 @@ fn replace_all<P1, P2>(
     source: P2,
     depth: usize,
     chapter_title: &mut String,
+    cutoff_commented_lines: bool,
 ) -> String
 where
     P1: AsRef<Path>,
@@ -87,14 +125,22 @@ where
     // we therefore have to store the difference to correct this
     let path = path.as_ref();
     let source = source.as_ref();
+    trace!(
+        "replace_all: path = {:?}, source={:?}",
+        path.display(),
+        source.display()
+    );
     let mut previous_end_index = 0;
     let mut replaced = String::new();
 
     for link in find_links(s) {
-        replaced.push_str(&s[previous_end_index..link.start_index]);
+        let slice_string = &s[previous_end_index..link.start_index];
+        trace!("replace_all: slice_string = {:?}", slice_string);
+        replaced.push_str(slice_string);
 
-        match link.render_with_path(path, chapter_title) {
+        match link.render_with_path(path, chapter_title, cutoff_commented_lines) {
             Ok(new_content) => {
+                trace!("replace_all: new_content = {:?}", new_content);
                 if depth < MAX_LINK_NESTED_DEPTH {
                     if let Some(rel_path) = link.link_type.relative_path(path) {
                         replaced.push_str(&replace_all(
@@ -103,6 +149,7 @@ where
                             source,
                             depth + 1,
                             chapter_title,
+                            cutoff_commented_lines,
                         ));
                     } else {
                         replaced.push_str(&new_content);
@@ -129,6 +176,7 @@ where
     }
 
     replaced.push_str(&s[previous_end_index..]);
+    trace!("replaced = [{:?}]", replaced.len());
     replaced
 }
 
@@ -323,6 +371,7 @@ impl<'a> Link<'a> {
         &self,
         base: P,
         chapter_title: &mut String,
+        cutoff_commented_lines: bool,
     ) -> Result<String> {
         let base = base.as_ref();
         match self.link_type {
@@ -330,7 +379,6 @@ impl<'a> Link<'a> {
             LinkType::Escaped => Ok(self.link_text[1..].to_owned()),
             LinkType::Include(ref pat, ref range_or_anchor) => {
                 let target = base.join(pat);
-
                 fs::read_to_string(&target)
                     .map(|s| match range_or_anchor {
                         RangeOrAnchor::Range(range) => take_lines(&s, range.clone()),
@@ -346,14 +394,14 @@ impl<'a> Link<'a> {
             }
             LinkType::RustdocInclude(ref pat, ref range_or_anchor) => {
                 let target = base.join(pat);
-
+                debug!("render_with_path: target = {:?}", &target.display());
                 fs::read_to_string(&target)
                     .map(|s| match range_or_anchor {
                         RangeOrAnchor::Range(range) => {
-                            take_rustdoc_include_lines(&s, range.clone())
+                            take_rustdoc_include_lines(&s, range.clone(), cutoff_commented_lines)
                         }
                         RangeOrAnchor::Anchor(anchor) => {
-                            take_rustdoc_include_anchored_lines(&s, anchor)
+                            take_rustdoc_include_anchored_lines(&s, anchor, cutoff_commented_lines)
                         }
                     })
                     .with_context(|| {
@@ -444,7 +492,10 @@ mod tests {
         {{#include file.rs}} << an escaped link!
         ```";
         let mut chapter_title = "test_replace_all_escaped".to_owned();
-        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title), end);
+        assert_eq!(
+            replace_all(start, "", "", 0, &mut chapter_title, false),
+            end
+        );
     }
 
     #[test]
@@ -456,8 +507,31 @@ mod tests {
         # My Chapter
         ";
         let mut chapter_title = "test_set_chapter_title".to_owned();
-        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title), end);
+        assert_eq!(replace_all(start, "", "", 0, &mut chapter_title, true), end);
         assert_eq!(chapter_title, "My Title");
+        assert_eq!(
+            replace_all(start, "", "", 0, &mut chapter_title, false),
+            end
+        );
+    }
+
+    #[test]
+    fn test_replace_all_escaped_with_cutoff() {
+        let start = r"
+        Some text over here.
+        ```hbs
+        \{{#include file.rs}} << an escaped link!
+        ```";
+        let end = r"
+        Some text over here.
+        ```hbs
+        {{#include file.rs}} << an escaped link!
+        ```";
+        let mut chapter_title = "test_replace_all_escaped_with_cutoff".to_owned();
+        assert_eq!(
+            replace_all(start, "", "", 0, &mut chapter_title, false),
+            end
+        );
     }
 
     #[test]
