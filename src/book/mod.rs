@@ -428,6 +428,11 @@ impl MDBook {
             .unwrap_or_default()
             .theme_dir(&self.root)
     }
+
+    /// Clone registered boxed preprocessors Vec
+    pub fn clone_preprocessors(&self) -> Vec<Box<dyn Preprocessor>> {
+        self.preprocessors.clone()
+    }
 }
 
 /// Look at the `Config` and try to figure out what renderers to use.
@@ -867,6 +872,7 @@ mod tests {
         assert!(should_run);
     }
 
+    #[derive(Default, Clone)]
     struct BoolPreprocessor(bool);
     impl Preprocessor for BoolPreprocessor {
         fn name(&self) -> &str {

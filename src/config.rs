@@ -427,6 +427,8 @@ pub struct BookConfig {
     /// The direction of text in the book: Left-to-right (LTR) or Right-to-left (RTL).
     /// When not specified, the text direction is derived from [`BookConfig::language`].
     pub text_direction: Option<TextDirection>,
+    /// The book version.
+    pub version: Option<String>,
 }
 
 impl Default for BookConfig {
@@ -439,6 +441,7 @@ impl Default for BookConfig {
             multilingual: false,
             language: Some(String::from("en")),
             text_direction: None,
+            version: Some(String::from("0.0.1")),
         }
     }
 }
@@ -823,6 +826,7 @@ mod tests {
         multilingual = true
         src = "source"
         language = "ja"
+        version = "0.0.1"
 
         [build]
         build-dir = "outputs"
@@ -863,6 +867,7 @@ mod tests {
             src: PathBuf::from("source"),
             language: Some(String::from("ja")),
             text_direction: None,
+            version: Some(String::from("0.0.1")),
         };
         let build_should_be = BuildConfig {
             build_dir: PathBuf::from("outputs"),
